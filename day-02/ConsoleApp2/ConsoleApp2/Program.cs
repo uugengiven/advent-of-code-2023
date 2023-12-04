@@ -30,13 +30,14 @@ class Program
         foreach(string line in lines)
         {
             Game game = ParseGame(line);
-            if (isValid(12, 13, 14, game))
-            {
-                total += game.id;
-            }
-            Console.WriteLine(line);
-            Console.WriteLine(game.toString());
-            Console.WriteLine(isValid(12, 13, 14, game));
+            // if (isValid(12, 13, 14, game))
+            // {
+            //     total += game.id;
+            // }
+            // Console.WriteLine(line);
+            // Console.WriteLine(game.toString());
+            // Console.WriteLine(isValid(12, 13, 14, game));
+            total += game.getPower();
         }
         Console.WriteLine(total);
     }
