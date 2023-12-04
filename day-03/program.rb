@@ -31,9 +31,9 @@ def build_serials()
         line.chars.each_with_index do |char, index|
             # see if char is a number
             if char =~ /[[:digit:]]/
-            # add the number to the current number
-            current_number += char
-            if current_start == nil
+                # add the number to the current number
+                current_number += char
+                if current_start == nil
                     current_start = index
                 end
             else
