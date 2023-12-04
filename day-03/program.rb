@@ -87,8 +87,44 @@ def mark_serials(serials)
     serials
 end
 
+def get_gears(serials)
+    # open the file
+    file = File.open("input.txt")
+    ignore_array = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ".", "\n"]
+
+    gears = []
+    # read the file line by line
+    current_line = 0
+    file.each do |line|
+        line.chars.each_with_index do |char, index|
+            # see if char is a symbol
+            if char == "*"
+                # check if the serial is in the line
+                connections = []
+                serials.each do |serial|
+                    if serial.row == current_line || serial.row == current_line - 1 || serial.row == current_line + 1
+                        if serial.start <= index + 1  && serial.end >= index - 1
+                            connections << serial.number
+                        end
+                    end
+                end
+                if connections.length == 2
+                    gears << connections[0] * connections[1]
+                end
+            end
+
+        end
+        current_line += 1
+    end
+
+    # close the file
+    file.close
+    gears
+end
+
 
 serials = build_serials()
+gears = get_gears(serials)
 serials = mark_serials(serials)
 
 # print all the serials
@@ -104,4 +140,12 @@ serials.each do |serial|
     end
 end
 
-puts "The sum is #{sum}"
+gear_sum = 0
+# sum all the gears
+gears.each do |gear|
+    gear_sum += gear
+end
+
+
+puts "The sum of serials is #{sum}"
+puts "The sum of gears is #{gear_sum}"
