@@ -14,11 +14,25 @@ class Serial
     end
 end
 
+class Pokken # things like Number or Symbol are reserved words but ruby will let me rewrite them and I deffo don't want to do that
+    attr_accessor :value
+    attr_accessor :column
+    attr_accessor :row
+    attr_accessor :is_gear
+    attr_accessor :gear_value
 
+    def initialize(value, column, row)
+        @value = value
+        @column = column
+        @row = row
+        @is_gear = false
+        @gear_value = 0
+    end
+end
 
-def build_serials()
+def build_arrays()
     serials = []
-
+    pokkens = []
     # open a file and read it line by line
     # open the file
     file = File.open("input.txt")
@@ -48,6 +62,10 @@ def build_serials()
                 end
                 current_start = nil
                 current_number = ""
+                if char != "\n" && char != "."
+                    pokken = Pokken.new(char, index, current_line)
+                    pokkens << pokken
+                end
             end
         end
         current_line += 1
@@ -55,82 +73,52 @@ def build_serials()
 
     # close the file
     file.close
+    [serials, pokkens]
+end
+
+def mark_serials(serials, pokkens)
+    pokkens.each do |pokken|
+        # check if the pokken is in a row with a serial
+        serials.each do |serial|
+            if serial.row == pokken.row || serial.row == pokken.row - 1 || serial.row == pokken.row + 1
+                if serial.start <= pokken.column + 1  && serial.end >= pokken.column - 1
+                    serial.is_serial = true
+                end
+            end
+        end
+    end
     serials
 end
 
-def mark_serials(serials)
-    # open the file
-    file = File.open("input.txt")
-    ignore_array = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ".", "\n"]
-
-    # read the file line by line
-    current_line = 0
-    file.each do |line|
-        line.chars.each_with_index do |char, index|
-            # see if char is a symbol
-            if !ignore_array.include?(char)
-                # check if the serial is in the line
-                serials.each do |serial|
-                    if serial.row == current_line || serial.row == current_line - 1 || serial.row == current_line + 1
-                        if serial.start <= index + 1  && serial.end >= index - 1
-                            serial.is_serial = true
-                        end
+def mark_gears(serials, pokkens)
+    pokkens.each do |pokken|
+        # check if the pokken value is *
+        if pokken.value == "*"
+            connections = []
+            serials.each do |serial|
+                if serial.row == pokken.row || serial.row == pokken.row - 1 || serial.row == pokken.row + 1
+                    if serial.start <= pokken.column + 1  && serial.end >= pokken.column - 1
+                        connections << serial.number
                     end
                 end
             end
-        end
-        current_line += 1
-    end
-
-    # close the file
-    file.close
-    serials
-end
-
-def get_gears(serials)
-    # open the file
-    file = File.open("input.txt")
-    ignore_array = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ".", "\n"]
-
-    gears = []
-    # read the file line by line
-    current_line = 0
-    file.each do |line|
-        line.chars.each_with_index do |char, index|
-            # see if char is a symbol
-            if char == "*"
-                # check if the serial is in the line
-                connections = []
-                serials.each do |serial|
-                    if serial.row == current_line || serial.row == current_line - 1 || serial.row == current_line + 1
-                        if serial.start <= index + 1  && serial.end >= index - 1
-                            connections << serial.number
-                        end
-                    end
-                end
-                if connections.length == 2
-                    gears << connections[0] * connections[1]
-                end
+            if connections.length == 2
+                pokken.is_gear = true
+                pokken.gear_value = connections[0] * connections[1]
             end
-
         end
-        current_line += 1
     end
-
-    # close the file
-    file.close
-    gears
 end
 
 
-serials = build_serials()
-gears = get_gears(serials)
-serials = mark_serials(serials)
+serials, pokkens = build_arrays()
+mark_gears(serials, pokkens)
+serials = mark_serials(serials, pokkens)
 
 # print all the serials
-serials.each do |serial|
-    puts "#{serial.number} #{serial.start} #{serial.end} #{serial.row} #{serial.is_serial}"
-end
+# serials.each do |serial|
+#     puts "#{serial.number} #{serial.start} #{serial.end} #{serial.row} #{serial.is_serial}"
+# end
 
 # sum all the serials where is_serial is true
 sum = 0
@@ -141,9 +129,11 @@ serials.each do |serial|
 end
 
 gear_sum = 0
-# sum all the gears
-gears.each do |gear|
-    gear_sum += gear
+# sum all the pokken values where is_gear is true
+pokkens.each do |pokken|
+    if pokken.is_gear
+        gear_sum += pokken.gear_value
+    end
 end
 
 
