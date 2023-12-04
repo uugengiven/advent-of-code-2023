@@ -76,44 +76,27 @@ def build_arrays()
     [serials, pokkens]
 end
 
-def mark_serials(serials, pokkens)
+def mark_serials_and_gears(serials, pokkens)
     pokkens.each do |pokken|
         # check if the pokken is in a row with a serial
+        connections = []
         serials.each do |serial|
             if serial.row == pokken.row || serial.row == pokken.row - 1 || serial.row == pokken.row + 1
                 if serial.start <= pokken.column + 1  && serial.end >= pokken.column - 1
                     serial.is_serial = true
+                    connections << serial.number
                 end
             end
         end
-    end
-    serials
-end
-
-def mark_gears(serials, pokkens)
-    pokkens.each do |pokken|
-        # check if the pokken value is *
-        if pokken.value == "*"
-            connections = []
-            serials.each do |serial|
-                if serial.row == pokken.row || serial.row == pokken.row - 1 || serial.row == pokken.row + 1
-                    if serial.start <= pokken.column + 1  && serial.end >= pokken.column - 1
-                        connections << serial.number
-                    end
-                end
-            end
-            if connections.length == 2
-                pokken.is_gear = true
-                pokken.gear_value = connections[0] * connections[1]
-            end
+        if connections.length == 2 && pokken.value == "*"
+            pokken.is_gear = true
+            pokken.gear_value = connections[0] * connections[1]
         end
     end
 end
-
 
 serials, pokkens = build_arrays()
-mark_gears(serials, pokkens)
-serials = mark_serials(serials, pokkens)
+mark_serials_and_gears(serials, pokkens)
 
 # print all the serials
 # serials.each do |serial|
