@@ -28,8 +28,10 @@ createArrays(Line) ->
     lists:map(fun(X) -> makeNumbers(lists:nth(2,string:tokens(X, ":"))) end, Line).
 
 makeNumbers(Line) ->
-    % lists:map(fun(X) -> stringToNumber(X) end, string:tokens(Line, " ")).
     lists:map(fun(Y) -> stringToNumber(Y) end, string:tokens(Line, " ")).
+    % funny and confusing thing - with the input I had, when the two arrays came back
+    % one was showing as a string ".MTO" or some such, which was just the ascii
+    % values, as erlang doesn't really differentiate between arrays of ints and strings
 
 stringToNumber(Value) ->
     {I1, []} = string:to_integer(Value),
